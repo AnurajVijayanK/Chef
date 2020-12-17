@@ -1,6 +1,6 @@
 {
 	"id": "group1",
 	"gid": 2000,
-	"members": ["user1","user2"],
+	"members": ["user1","user2","user3"],
 	"platform": "centos"
 }
