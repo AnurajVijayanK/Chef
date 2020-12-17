@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+unless Vagrant.has_plugin?("vagrant-ohai")
+  raise "vagrant-ohai plugin is not installed! Install with 'vagrant plugin install vagrant-ohai'"
+end
+
+NODE_SCRIPT = <<EOF.freeze
+  echo "Preparing node..."
+  # ensure the time is up to date
+  yum -y install ntp
+  systemctl start ntpd
+  systemctl enable ntpd
+  curl -L https://omnitruck.chef.io/install.sh | sudo bash -s -- -v 14
+EOF
+
+def set_hostname(server)
+  server.vm.provision 'shell', inline: "hostname #{server.vm.hostname}"
+end
+
+Vagrant.configure(2) do |config|
+
+ config.vm.define 'db1' do |n|
+    n.vm.box = 'bento/centos-7.2'
+    n.vm.box_url = 'https://vagrantcloud.com/bento/boxes/centos-7.2'
+    n.vm.box_version = '2.3.1'
+    n.vm.hostname = 'db1'
+    n.vm.network :private_network, ip: '192.168.10.50', nic_type: "virtio"
+    n.vm.provision :shell, inline: NODE_SCRIPT.dup
+   set_hostname(n)
+  end
+
+ config.vm.define 'db2' do |n|
+    n.vm.box = 'bento/centos-7.2'
+    n.vm.box_url = 'https://vagrantcloud.com/bento/boxes/centos-7.2'
+    n.vm.box_version = '2.3.1'
+    n.vm.hostname = 'db2'
+    n.vm.network :private_network, ip: '192.168.10.52', nic_type: "virtio"
+    n.vm.provision :shell, inline: NODE_SCRIPT.dup
+   set_hostname(n)
+  end
+
+
+end
